@@ -575,8 +575,10 @@ public class RNBluetoothEscposPrinterModule extends ReactContextBaseJavaModule
             promise.reject(e.getMessage(), e);
         }
     }
+    
     @ReactMethod
-    public void printHorizontalQRCode(ReadableArray data, int gap, int size, int leftPadding, int topGap, int correctionLevel, final Promise promise) {
+    public void printHorizontalQRCode(ReadableArray data, int gap, int size, int leftPadding, int topGap, int emptyLineNumber, int correctionFactor, int correctionLevel, final Promise promise) {
+        // CorrectionFactor: The number of QR code prints, after which an empty line should be printed
         try {
             // Log.i(TAG, "生成的文本：" + content);
             // 把输入的文本转为二维码
@@ -587,7 +589,7 @@ public class RNBluetoothEscposPrinterModule extends ReactContextBaseJavaModule
 
             for(int i=0;i<data.size();i++){
 
-                if ((i > 0) && (i%5 == 0)){
+                if ((i > 0) && (i%correctionFactor == 0)){
                     // Print a new line to keep in sync
                     printText("\n", null, promise); 
                 }
@@ -657,8 +659,9 @@ public class RNBluetoothEscposPrinterModule extends ReactContextBaseJavaModule
                     printColumnAndroid(colWidths, align, colData, null, promise);  // Print the caption below QR code
 
                     // Add empty lines after the QR code data
-                    printText("\n", null, promise);
-                    printText("\n", null, promise); 
+                    for (int j=0;j<emptyLineNumber;j++){
+                        printText("\n", null, promise);
+                    }                    
                 } else {
                     promise.reject("COMMAND_NOT_SEND");
                 }
@@ -668,7 +671,6 @@ public class RNBluetoothEscposPrinterModule extends ReactContextBaseJavaModule
             promise.reject(e.getMessage(), e);
         }
     }
-
     @ReactMethod
     public void printBarCode(String str, int nType, int nWidthX, int nHeight,
                              int nHriFontType, int nHriFontPosition) {
